@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comfyui-mie-llm"
+description = "Mie's LLM client layer: the connector per provider, the shared call budget, and the helpers they need."
+version = "0.1.0"
+license = "GPL-3.0"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+]
+
+[tool.setuptools]
+packages = [
+    "mie_llm",
+]
+
+[tool.setuptools.package-data]
+"mie_prompt.prompts" = ["h3/*", "h3_loop/*", "h3_storyboard/*"]

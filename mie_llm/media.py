@@ -1,22 +1,46 @@
-"""Image helpers - the only part of the core that needs the heavy stack.
+"""Image helpers - the only part of the package that touches the heavy stack.
 
-numpy, opencv and torch are imported at module level because these
-functions exist to serve tensors and images. Everything else in the core
-imports them lazily, so a text-only consumer never pays for them.
+numpy and opencv are imported inside the functions that use them, never at
+module level. This package declares ``requests`` as its only dependency, so
+importing :mod:`mie_llm.media` must not drag in a deep learning stack: a
+text-only consumer of the LLM layer never pays for numpy or opencv, and the
+product layer's virtualenv stays small.
+
+``torch`` is deliberately not imported here. A ComfyUI IMAGE tensor is
+handled by duck typing (``detach`` / ``cpu`` / ``numpy``), so the tensor
+library is the caller's business, not ours. Pillow is not used at all.
 """
 
 from __future__ import annotations
 
 import base64
 
-import cv2
-import numpy as np
-import torch
-from PIL import Image
+
+def _heavy_stack():
+    """Import numpy and opencv on demand.
+
+    Kept out of module level so that importing this module stays free.
+    """
+    try:
+        import cv2
+        import numpy as np
+    except ImportError as exc:  # pragma: no cover - depends on the environment
+        raise ImportError(
+            "mie_llm.media needs numpy and opencv to encode images. "
+            "Install them with `pip install numpy opencv-python-headless`, "
+            "or use the text-only helpers in this package."
+        ) from exc
+    return np, cv2
+
 
 def image_tensor_to_data_url(image, fmt=".jpg"):
+    """Encode one image as a JPEG data URL.
+
+    `image` is a ComfyUI IMAGE tensor, or anything with the numpy surface.
+    """
     if image is None:
         return None
+    np, cv2 = _heavy_stack()
     t = image[0] if hasattr(image, "ndim") and image.ndim == 4 else image
     if hasattr(t, "detach"):
         img_np = t.detach().cpu().numpy()
@@ -73,4 +97,3 @@ def build_multimodal_user_content(text, image_urls=None, image_detail="auto"):
     elif not parts:
         parts.append({"type": "text", "text": ""})
     return parts
-

@@ -2,7 +2,7 @@
 
 Deliberately free of numpy, opencv and torch: the product layer installs
 this package to talk to a model, and it should not have to pull a deep
-learning stack for that. The image helpers live in :mod:`mie_core.media`,
+learning stack for that. The image helpers live in :mod:`mie_llm.media`,
 which imports the heavy stack lazily.
 """
 

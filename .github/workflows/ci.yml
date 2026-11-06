@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build and self-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check out the sibling packages
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/MieMieeeee/ComfyUI-Mie-Prompt.git ./sibling-prompt
+          git clone --depth 1 https://github.com/MieMieeeee/ComfyUI-Mie-Craft.git ./sibling-craft
+
+      - name: Install the chain
+        shell: bash
+        run: pip install -e ./sibling-prompt -e ./sibling-craft -e .
+
+      - name: Build the wheel
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+
+      - name: Self-test
+        shell: bash
+        run: python selftest.py

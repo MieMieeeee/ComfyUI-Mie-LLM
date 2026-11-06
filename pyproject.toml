@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "comfyui-mie-llm"
 description = "Mie's LLM client layer: the connector per provider, the shared call budget, and the helpers they need."
-version = "0.1.1"
+version = "0.1.2"
 license = "GPL-3.0"
 readme = "README.md"
 requires-python = ">=3.10"

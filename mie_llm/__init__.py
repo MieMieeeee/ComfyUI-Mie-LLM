@@ -5,4 +5,4 @@ never loads a model itself. That is what keeps the dependency surface at
 ``requests``.
 """
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
